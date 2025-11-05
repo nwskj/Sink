@@ -1,0 +1,5 @@
+# 针对 Cloudflare Pages 的 Worker 配置
+name = "your-project-name"  # 可替换为你的项目名
+main = "./dist/_worker.js"  # Nuxt 构建输出的 Worker 路径（默认是这个）
+compatibility_date = "2025-11-05"  # 与你日志中的构建日期一致，或用 "latest"
+compatibility_flags = ["nodejs_compat"]  # 关键：启用 Node.js 兼容性
