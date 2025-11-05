@@ -2,7 +2,6 @@ import tailwindcss from '@tailwindcss/vite'
 import { provider } from 'std-env'
 import { currentLocales } from './i18n/i18n'
 
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
     '@nuxthub/core',
@@ -18,6 +17,7 @@ export default defineNuxtConfig({
     classSuffix: '',
   },
   runtimeConfig: {
+    // 保持原有配置...
     siteToken: crypto.randomUUID(),
     redirectStatusCode: '301',
     linkCacheTtl: 60,
@@ -37,6 +37,7 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
+    // 保持原有配置...
     '/': {
       prerender: true,
     },
@@ -56,7 +57,12 @@ export default defineNuxtConfig({
   },
   compatibilityDate: 'latest',
   nitro: {
-    preset: import.meta.env.DEV ? 'cloudflare-module' : undefined,
+    // 关键修改：添加 Cloudflare 兼容性配置
+    preset: import.meta.env.DEV ? 'cloudflare-module' : 'cloudflare-pages',
+    cloudflare: {
+      // 启用 Node.js 兼容性模式（解决 node:buffer 等模块缺失问题）
+      compatibilityFlags: ['nodejs_compat']
+    },
     experimental: {
       openAPI: true,
     },
@@ -79,6 +85,7 @@ export default defineNuxtConfig({
     },
   },
   hub: {
+    // 保持原有配置...
     ai: true,
     analytics: true,
     blob: false,
@@ -99,6 +106,7 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
+    // 保持原有配置...
     locales: currentLocales,
     compilation: {
       strictMessage: false,
@@ -114,14 +122,7 @@ export default defineNuxtConfig({
     defaultLocale: 'en-US',
   },
   shadcn: {
-    /**
-     * Prefix for all the imported component
-     */
     prefix: '',
-    /**
-     * Directory that the component lives in.
-     * @default "./components/ui"
-     */
     componentDir: './app/components/ui',
   },
 })
