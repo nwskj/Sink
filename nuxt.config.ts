@@ -17,7 +17,6 @@ export default defineNuxtConfig({
     classSuffix: '',
   },
   runtimeConfig: {
-    // 保持原有配置...
     siteToken: crypto.randomUUID(),
     redirectStatusCode: '301',
     linkCacheTtl: 60,
@@ -37,7 +36,6 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
-    // 保持原有配置...
     '/': {
       prerender: true,
     },
@@ -54,14 +52,46 @@ export default defineNuxtConfig({
   },
   experimental: {
     enforceModuleCompatibility: true,
+    // 新增：客户端 Node.js 模块兼容，避免构建时误删依赖
+    clientNodeCompat: true,
   },
-  compatibilityDate: 'latest',
+  // 关键：指定明确的兼容性日期（需 ≥2024-09-23，与 Cloudflare 要求一致）
+  compatibilityDate: '2025-11-05',
   nitro: {
-    // 关键修改：添加 Cloudflare 兼容性配置
     preset: import.meta.env.DEV ? 'cloudflare-module' : 'cloudflare-pages',
     cloudflare: {
-      // 启用 Node.js 兼容性模式（解决 node:buffer 等模块缺失问题）
-      compatibilityFlags: ['nodejs_compat']
+      compatibilityFlags: ['nodejs_compat'],
+      compatibilityDate: '2025-11-05', // 显式同步日期，避免版本不匹配
+    },
+    // 新增：声明 Node.js 模块副作用，防止构建时被 tree-shake 移除
+    moduleSideEffects: [
+      'node:buffer',
+      'node:events',
+      'node:process',
+      'node:timers',
+      'node:async_hooks'
+    ],
+    // 新增：构建配置，强制保留 Node.js 模块并映射全局变量
+    build: {
+      rollupOptions: {
+        external: [
+          'node:buffer',
+          'node:events',
+          'node:process',
+          'node:timers',
+          'node:async_hooks'
+        ],
+        output: {
+          // 映射 Node.js 模块到全局变量，确保 Worker 运行时可访问
+          globals: {
+            'node:buffer': 'Buffer',
+            'node:events': 'events',
+            'node:process': 'process',
+            'node:timers': 'timers',
+            'node:async_hooks': 'async_hooks'
+          }
+        }
+      }
     },
     experimental: {
       openAPI: true,
@@ -85,7 +115,6 @@ export default defineNuxtConfig({
     },
   },
   hub: {
-    // 保持原有配置...
     ai: true,
     analytics: true,
     blob: false,
@@ -98,6 +127,16 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    // 新增：Vite 构建时保留 Node.js 模块引用
+    optimizeDeps: {
+      exclude: [
+        'node:buffer',
+        'node:events',
+        'node:process',
+        'node:timers',
+        'node:async_hooks'
+      ]
+    }
   },
   eslint: {
     config: {
@@ -106,7 +145,6 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    // 保持原有配置...
     locales: currentLocales,
     compilation: {
       strictMessage: false,
